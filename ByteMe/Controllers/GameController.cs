@@ -1,7 +1,8 @@
 ﻿using ByteMe.API.Services.Interfaces;
 using ByteMe.API.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
-using ByteMe.API.DTOs;
+using ByteMe.Shared.DTOs;
+using ByteMe.API.Services;
 
 namespace ByteMe.API.Controllers
 {
@@ -10,10 +11,13 @@ namespace ByteMe.API.Controllers
     public class GameController : ControllerBase
     {
         private readonly IGameService _gameService;
+        private readonly GameSessionService _gameSessionService;
 
-        public GameController(IGameService gameService)
+
+        public GameController(IGameService gameService, GameSessionService gameSessionService)
         {
             _gameService = gameService;
+            _gameSessionService = gameSessionService;
         }
 
         [HttpPost("start")]
@@ -24,13 +28,16 @@ namespace ByteMe.API.Controllers
         }
 
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetGameStatus(int id)
+        [HttpGet("{id}/status")]
+        public IActionResult GetGameStatus(string id)
         {
-            var game = await _gameService.GetGameStatusAsync(id);
-            if (game == null) return NotFound();
-            return Ok(game);
+            if (_gameSessionService.TryGetGameSession(id, out var gameSession))
+            {
+                return Ok(gameSession);
+            }
+            return NotFound();
         }
+
 
         [HttpPost("{id}/submit-scores")]
         public async Task<IActionResult> SubmitScores(int id, [FromBody] SubmitScoresRequest request)

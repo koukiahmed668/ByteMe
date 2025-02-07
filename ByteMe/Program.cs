@@ -5,7 +5,6 @@ using ByteMe.API.Services.Interfaces;
 using ByteMe.API.Services;
 using ByteMe.API.Data;
 using Microsoft.EntityFrameworkCore;
-using ByteMe.API.Hubs;
 using System;
 
 namespace ByteMe
@@ -24,6 +23,9 @@ namespace ByteMe
 
             builder.Services.AddScoped<IGameService, GameService>();
             builder.Services.AddScoped<IGameRepository, GameRepository>();
+            builder.Services.AddSingleton<GameSessionService>();
+
+
             builder.Services.AddControllers();
             builder.Services.AddSignalR(); // Important for GameHub
             builder.Services.AddEndpointsApiExplorer();

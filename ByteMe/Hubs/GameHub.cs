@@ -1,26 +1,62 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using System.Threading.Tasks;
+﻿using ByteMe.Shared.DTOs;
+using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent; // Reference the shared DTO
 
-namespace ByteMe.API.Hubs
+public class GameHub : Hub
 {
-    public class GameHub : Hub
+    private readonly ConcurrentQueue<string> _waitingPlayers;
+    private readonly ConcurrentDictionary<string, ByteMe.Shared.DTOs.GameSession> _activeGames;
+
+    public GameHub(
+        ConcurrentQueue<string> waitingPlayers,
+        ConcurrentDictionary<string, ByteMe.Shared.DTOs.GameSession> activeGames)
     {
-        // Notify when a player joins the game
-        public async Task JoinGame(string playerName)
-        {
-            await Clients.All.SendAsync("PlayerJoined", playerName);
-        }
+        _waitingPlayers = waitingPlayers;
+        _activeGames = activeGames;
+    }
 
-        // Broadcast scores to all connected clients
-        public async Task SubmitScore(string playerName, int score)
-        {
-            await Clients.All.SendAsync("ScoreSubmitted", playerName, score);
-        }
+    public async Task JoinMatchmaking(string playerName)
+    {
+        _waitingPlayers.Enqueue(playerName);
 
-        // Notify when the game ends
-        public async Task EndGame(string winner)
+        if (_waitingPlayers.Count >= 2)
         {
-            await Clients.All.SendAsync("GameEnded", winner);
+            if (_waitingPlayers.TryDequeue(out string playerOne) &&
+                _waitingPlayers.TryDequeue(out string playerTwo))
+            {
+                var gameId = Guid.NewGuid().ToString();
+                var gameSession = new ByteMe.Shared.DTOs.GameSession
+                {
+                    GameId = gameId,
+                    PlayerOne = playerOne,
+                    PlayerTwo = playerTwo,
+                    Questions = GenerateQuestions()
+                };
+
+                _activeGames[gameId] = gameSession;
+
+                await Clients.Client(Context.ConnectionId).SendAsync("MatchFound", gameId, playerOne, playerTwo);
+                await Clients.All.SendAsync("GameStarted", gameSession);
+            }
         }
+    }
+
+    public async Task SubmitAnswer(string gameId, string playerName, string answer)
+    {
+        if (!_activeGames.TryGetValue(gameId, out var gameSession))
+            return;
+
+        gameSession.SubmitAnswer(playerName, answer);
+
+        await Clients.Group(gameId).SendAsync("ScoreUpdated", gameSession);
+    }
+
+    private List<ByteMe.Shared.DTOs.QuestionDto> GenerateQuestions()
+    {
+        return new List<ByteMe.Shared.DTOs.QuestionDto>
+        {
+            new ByteMe.Shared.DTOs.QuestionDto { Question = "2 + 2", CorrectAnswer = "4" },
+            new ByteMe.Shared.DTOs.QuestionDto { Question = "5 * 3", CorrectAnswer = "15" }
+        };
     }
 }

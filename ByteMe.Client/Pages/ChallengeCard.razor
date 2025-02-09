@@ -1,0 +1,19 @@
+﻿<div class="card p-4 rounded-md bg-blue-50 shadow-lg">
+    <p class="font-semibold">@Question</p>
+    <input type="text" @bind="UserAnswer" class="mt-2 p-1 border rounded-md w-full" />
+    <button class="mt-2 px-3 py-1 bg-blue-600 text-white rounded-md"
+            @onclick="SubmitAnswer">
+        Submit
+    </button>
+</div>
+
+@code {
+    [Parameter] public string Question { get; set; }
+    [Parameter] public EventCallback<string> OnAnswer { get; set; }
+    private string UserAnswer { get; set; }
+
+    private async Task SubmitAnswer()
+    {
+        await OnAnswer.InvokeAsync(UserAnswer);
+    }
+}

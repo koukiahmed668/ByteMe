@@ -1,0 +1,32 @@
+﻿@page "/game-room/{GameId:int}"
+
+<h1 class="text-3xl font-bold mb-6">Game Room</h1>
+
+<p class="text-lg">You are now in the game! Answer questions below.</p>
+
+<ul class="list-disc pl-6">
+    @foreach (var question in Questions)
+    {
+        <li class="my-2">
+            <ChallengeCard Question="@question"
+                           OnAnswer="@((answer) => HandleAnswer(question, answer))" />
+        </li>
+    }
+</ul>
+
+<Scoreboard @bind-Scores="Scores" />
+
+@code {
+    [Parameter] public int GameId { get; set; }
+    private List<string> Questions = new() { "2 + 2", "5 * 3" };
+    private Dictionary<string, int> Scores = new() { ["PlayerOne"] = 0, ["PlayerTwo"] = 0 };
+
+    private void HandleAnswer(string question, string answer)
+    {
+        if (answer == "4" && question == "2 + 2")
+        {
+            Scores["PlayerOne"] += 10;
+        }
+        StateHasChanged();
+    }
+}

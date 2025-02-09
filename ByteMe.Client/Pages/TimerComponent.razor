@@ -1,0 +1,16 @@
+﻿<div class="text-center text-xl p-4">
+    Time Remaining: <span>@TimeRemaining</span>
+</div>
+
+@code {
+    private int TimeRemaining = 30;
+
+    protected override async Task OnInitializedAsync()
+    {
+        while (TimeRemaining > 0)
+        {
+            await Task.Delay(1000);
+            TimeRemaining--;
+        }
+    }
+}

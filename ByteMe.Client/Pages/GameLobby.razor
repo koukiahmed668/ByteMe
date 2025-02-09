@@ -1,0 +1,30 @@
+﻿@page "/game-lobby"
+
+<h1 class="text-3xl font-bold mb-4">Game Lobby</h1>
+<p class="text-lg mb-6">Join the battle of wits by entering your name and matchmaking.</p>
+
+<div class="flex items-center gap-4">
+    <input @bind="PlayerName" placeholder="Enter your name" class="border rounded p-2 w-64">
+    <button @onclick="JoinMatchmaking" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">
+        Join Matchmaking
+    </button>
+</div>
+
+@if (MatchFound)
+{
+    <p class="mt-4 text-green-500">Match found! Game starting soon...</p>
+}
+
+@code {
+    private string PlayerName { get; set; }
+    private bool MatchFound { get; set; } = false;
+
+    private async Task JoinMatchmaking()
+    {
+        if (!string.IsNullOrEmpty(PlayerName))
+        {
+            // Replace with hub call logic later
+            MatchFound = true;
+        }
+    }
+}

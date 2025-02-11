@@ -1,0 +1,55 @@
+﻿@page "/matchmaking"
+
+<div class="container my-5">
+    <div class="text-center">
+        <h1 class="display-5 fw-bold text-primary">Matchmaking Lobby</h1>
+        <p class="lead text-secondary">Find an opponent and start your coding challenge!</p>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h5 class="card-title text-dark">Ready to Compete?</h5>
+            <p class="card-text text-muted">
+                Click the button below to join the matchmaking queue.
+                We'll find you an opponent as soon as possible.
+            </p>
+            <div class="d-flex justify-content-center mt-3">
+                <button @onclick="JoinMatchmaking" class="btn btn-primary btn-lg">
+                    Join Matchmaking Queue
+                </button>
+            </div>
+
+            <div class="mt-4 text-center">
+                @if (IsSearching)
+                {
+                    <div class="alert alert-info mt-3">
+                        <strong>Searching for an opponent...</strong> Please wait!
+                    </div>
+                }
+                else if (!string.IsNullOrWhiteSpace(MatchStatus))
+                {
+                    <div class="alert alert-success mt-3">
+                        <strong>@MatchStatus</strong>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool IsSearching;
+    private string MatchStatus;
+
+    private async Task JoinMatchmaking()
+    {
+        IsSearching = true;
+        MatchStatus = string.Empty;
+
+        // Simulate matchmaking delay
+        await Task.Delay(3000); // Pretend we're finding a match
+
+        IsSearching = false;
+        MatchStatus = "Opponent Found! Get ready to play.";
+    }
+}
